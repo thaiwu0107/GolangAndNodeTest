@@ -18,3 +18,4 @@ for (let index = 0; index < config.testloop; index++) {
 diff = process.hrtime(time);
 console.log(`Benchmark ${config.testloop} times -> took ${diff[0] * NS_PER_SEC + diff[1]} nanoseconds`);
 console.log(`Benchmark ${config.testloop} times -> took ${(diff[0] * NS_PER_SEC + diff[1]) * MS_PER_NS} milliseconds`);
+console.log(`Benchmark each times -> took ${~~((diff[0] * NS_PER_SEC + diff[1]) / config.testloop)} nanoseconds`);
