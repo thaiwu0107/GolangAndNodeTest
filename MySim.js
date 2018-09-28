@@ -16,6 +16,6 @@ for (let index = 0; index < config.testloop; index++) {
     mysim.getRankInfo(inputCards);
 }
 diff = process.hrtime(time);
-console.log(`Benchmark ${config.testloop} times -> took ${diff[0] * NS_PER_SEC + diff[1]} nanoseconds`);
-console.log(`Benchmark ${config.testloop} times -> took ${(diff[0] * NS_PER_SEC + diff[1]) * MS_PER_NS} milliseconds`);
-console.log(`Benchmark each times -> took ${~~((diff[0] * NS_PER_SEC + diff[1]) / config.testloop)} ns/op`);
+console.log(`Nodejs - Benchmark ${config.testloop} times -> took ${diff[0] * NS_PER_SEC + diff[1]} nanoseconds`);
+console.log(`Nodejs - Benchmark ${config.testloop} times -> took ${(diff[0] * NS_PER_SEC + diff[1]) * MS_PER_NS} milliseconds`);
+console.log(`Nodejs - Benchmark each times -> took ${~~((diff[0] * NS_PER_SEC + diff[1]) / config.testloop)} ns/op`);

@@ -205,13 +205,13 @@ func main() {
 	}
 	<-c
 	elapsed1 := time.Since(t1)
-	fmt.Println("Benchmark times: ", loopTimes)
-	fmt.Println("Benchmark Multi-core processor took: ", elapsed1)
+	fmt.Println("Golang - Benchmark times: ", loopTimes)
+	fmt.Println("Golang - Benchmark Multi-core processor took: ", elapsed1)
 	t2 := time.Now()
 	for i := 0; i < loopTimes; i++ {
 		PokerCalculator(a)
 	}
 	elapsed2 := time.Since(t2)
-	fmt.Println("Benchmark times: ", loopTimes)
-	fmt.Println("Benchmark Single-core processor took: ", elapsed2)
+	fmt.Println("Golang - Benchmark times: ", loopTimes)
+	fmt.Println("Golang - Benchmark Single-core processor took: ", elapsed2)
 }
