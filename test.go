@@ -1,18 +1,27 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"runtime"
 	"strconv"
-	"strings"
+	"sync/atomic"
 	"time"
 
 	jsoniter "github.com/json-iterator/go"
 )
 
-var rankTable7CF map[string]interface{}
-var rankTable7CNF map[string]interface{}
+type Rank struct {
+	Type7     string `json:"Type7"`
+	Rank      int    `json:"Rank"`
+	Type5Ch   string `json:"Type5Ch"`
+	Type5En   string `json:"Type5En"`
+	CardPoint []int  `json:"CardPoint"`
+}
+
+var rankTable7CF map[string]*Rank
+var rankTable7CNF map[string]*Rank
 var config map[string]interface{}
 
 func InitJSONToMap() {
@@ -28,7 +37,6 @@ func InitJSONToMap() {
 	if err3 != nil {
 		fmt.Println(err3)
 	}
-	fmt.Println("Successfully ioutil.ReadFile")
 	var json = jsoniter.ConfigCompatibleWithStandardLibrary
 	error1 := json.Unmarshal(jsonFileConfig, &config)
 	if error1 != nil {
@@ -45,10 +53,9 @@ func InitJSONToMap() {
 		fmt.Println("Unmarshal failed, ", error3)
 		return
 	}
-	fmt.Println("Successfully All Json To Map")
 }
 
-func GoPokerCalculator(c chan bool, in []string) {
+func GoPokerCalculator(in []string) {
 	var cardMap = [5][15]int{
 		{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 		{0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -58,7 +65,7 @@ func GoPokerCalculator(c chan bool, in []string) {
 	}
 	var point int
 	var suit int
-	suitMap := make(map[int][]int)
+	suitMap := make(map[int][]int, 7)
 
 	for i := 0; i < 7; i++ {
 		suitInt, _ := strconv.Atoi(in[i])
@@ -72,10 +79,7 @@ func GoPokerCalculator(c chan bool, in []string) {
 		if suitMap[point] != nil {
 			suitMap[point] = append(suitMap[point], suit)
 		} else {
-			var osa = make([]int, 0)
-			sa := &osa
-			*sa = append(*sa, suit)
-			suitMap[point] = osa
+			suitMap[point] = []int{suit}
 		}
 
 	}
@@ -89,31 +93,27 @@ func GoPokerCalculator(c chan bool, in []string) {
 			break
 		}
 	}
-	var keyOfRankString []string
-	var keyOfRank string
+	var buffer bytes.Buffer
 	for i := 14; i > 1; i-- {
-		keyOfRankString = append(keyOfRankString, strconv.Itoa(cardMap[selectSuit][i]))
+		buffer.WriteString(strconv.Itoa(cardMap[selectSuit][i]))
 	}
-	keyOfRank = strings.Join(keyOfRankString, "")
-	var rankInfo interface{}
+	keyOfRank := buffer.String()
+	var rankInfo *Rank
 	selectCards := make([]string, 5)
 	if isFlush {
 		rankInfo = rankTable7CF[keyOfRank]
 		for i := 0; i < 5; i++ {
-			cardPoint := rankInfo.(map[string]interface{})["CardPoint"].([]interface{})[i]
-			point := int(cardPoint.(float64))
+			point := rankInfo.CardPoint[i]
 			selectCards[i] = strconv.Itoa(point*10 + selectSuit)
 		}
 	} else {
 		rankInfo = rankTable7CNF[keyOfRank]
 		for i := 0; i < 5; i++ {
-			cardPoint := rankInfo.(map[string]interface{})["CardPoint"].([]interface{})[i]
-			point := int(cardPoint.(float64))
+			point := rankInfo.CardPoint[i]
 			suit, suitMap[point] = suitMap[point][len(suitMap[point])-1], suitMap[point][:len(suitMap[point])-1]
 			selectCards[i] = strconv.Itoa(point*10 + suit)
 		}
 	}
-	c <- true
 }
 
 func PokerCalculator(in []string) {
@@ -126,7 +126,7 @@ func PokerCalculator(in []string) {
 	}
 	var point int
 	var suit int
-	suitMap := make(map[int][]int)
+	suitMap := make(map[int][]int, 7)
 
 	for i := 0; i < 7; i++ {
 		suitInt, _ := strconv.Atoi(in[i])
@@ -140,10 +140,7 @@ func PokerCalculator(in []string) {
 		if suitMap[point] != nil {
 			suitMap[point] = append(suitMap[point], suit)
 		} else {
-			var osa = make([]int, 0)
-			sa := &osa
-			*sa = append(*sa, suit)
-			suitMap[point] = osa
+			suitMap[point] = []int{suit}
 		}
 
 	}
@@ -157,26 +154,23 @@ func PokerCalculator(in []string) {
 			break
 		}
 	}
-	var keyOfRankString []string
-	var keyOfRank string
+	var buffer bytes.Buffer
 	for i := 14; i > 1; i-- {
-		keyOfRankString = append(keyOfRankString, strconv.Itoa(cardMap[selectSuit][i]))
+		buffer.WriteString(strconv.Itoa(cardMap[selectSuit][i]))
 	}
-	keyOfRank = strings.Join(keyOfRankString, "")
-	var rankInfo interface{}
+	keyOfRank := buffer.String()
+	var rankInfo *Rank
 	selectCards := make([]string, 5)
 	if isFlush {
 		rankInfo = rankTable7CF[keyOfRank]
 		for i := 0; i < 5; i++ {
-			cardPoint := rankInfo.(map[string]interface{})["CardPoint"].([]interface{})[i]
-			point := int(cardPoint.(float64))
+			point := rankInfo.CardPoint[i]
 			selectCards[i] = strconv.Itoa(point*10 + selectSuit)
 		}
 	} else {
 		rankInfo = rankTable7CNF[keyOfRank]
 		for i := 0; i < 5; i++ {
-			cardPoint := rankInfo.(map[string]interface{})["CardPoint"].([]interface{})[i]
-			point := int(cardPoint.(float64))
+			point := rankInfo.CardPoint[i]
 			suit, suitMap[point] = suitMap[point][len(suitMap[point])-1], suitMap[point][:len(suitMap[point])-1]
 			selectCards[i] = strconv.Itoa(point*10 + suit)
 		}
@@ -199,19 +193,32 @@ func main() {
 	a[5] = "24"
 	a[6] = "132"
 
+	remain := int64(loopTimes)
+	poolSize := 300
+	pool := make(chan struct{}, poolSize)
+	for range make([]struct{}, poolSize) {
+		pool <- struct{}{}
+	}
 	t1 := time.Now()
 	for i := 0; i < loopTimes; i++ {
-		go GoPokerCalculator(c, a)
+		<-pool
+		go func() {
+			GoPokerCalculator(a)
+			pool <- struct{}{}
+			if atomic.AddInt64(&remain, -1) == 0 {
+				c <- true
+			}
+		}()
 	}
 	<-c
 	elapsed1 := time.Since(t1)
 	fmt.Println("Golang - Benchmark times: ", loopTimes)
+	fmt.Println("Golang - Benchmark Multi-core poolSize: ", poolSize)
 	fmt.Println("Golang - Benchmark Multi-core processor took: ", elapsed1)
 	t2 := time.Now()
 	for i := 0; i < loopTimes; i++ {
 		PokerCalculator(a)
 	}
 	elapsed2 := time.Since(t2)
-	fmt.Println("Golang - Benchmark times: ", loopTimes)
 	fmt.Println("Golang - Benchmark Single-core processor took: ", elapsed2)
 }
