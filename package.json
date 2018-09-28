@@ -1,0 +1,18 @@
+{
+  "name": "helloworld",
+  "version": "1.0.0",
+  "description": "",
+  "main": "test.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "grpc": "^1.15.1",
+    "grpc-caller": "^0.9.0"
+  },
+  "devDependencies": {
+    "grpc_tools_node_protoc_ts": "^2.4.0"
+  }
+}

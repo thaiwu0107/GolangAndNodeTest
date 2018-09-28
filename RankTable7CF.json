@@ -1,0 +1,16 @@
+{
+  "1111111000000": {
+    "Type7": "SF7",
+    "Rank": 90010,
+    "Type5Ch": "同花順",
+    "Type5En": "Straight Flush",
+    "CardPoint": [ 14, 13, 12, 11, 10 ]
+  },
+  "0111111100000": {
+    "Type7": "SF7",
+    "Rank": 90009,
+    "Type5Ch": "同花順",
+    "Type5En": "Straight Flush",
+    "CardPoint": [ 13, 12, 11, 10, 9 ]
+  }
+}										
