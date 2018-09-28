@@ -1,5 +1,5 @@
 {
-    "testloop": 1000000,
+    "testloop": 500000,
     "runtimeGOMAXPROCS": 4
 }										
   
